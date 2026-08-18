@@ -6,7 +6,8 @@ async function runNavigator({ message, history = [] }) {
   return callModel({
     message,
     history,
-    systemPrompt
+    systemPrompt,
+    temperature: 0.5
   });
 }
 

@@ -50,18 +50,30 @@ async function callModel({
 
   // Standard fetch() POST request to the LLM proxy endpoint.
   // We send JSON with the model name and message list.
-  const response = await fetch(`${baseUrl}/chat/completions`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`
-    },
-    body: JSON.stringify({
-      model: selectedModel,
-      messages,
-      temperature
-    })
-  });
+  // Request streaming for faster perceived response time
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+  let response;
+  try {
+    response = await fetch(`${baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: selectedModel,
+        messages,
+        temperature,
+        stream: false,
+        max_tokens: 500
+      }),
+      signal: controller.signal
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
 
   const data = await response.json();
 

@@ -3,56 +3,63 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>☠️ Pirate's Crew - Skull & Crossbones ☠️</title>
+    <title>Multi-Agent Chat Assistant</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
     <div class="app-shell">
       <header class="topbar">
         <div>
-            <p class="eyebrow">☠️ Summon the Cursed ☠️</p>
-          <h1>☠️ SKULL CREW ☠️</h1>
+          <p class="eyebrow">nasty crew</p>
+          <h1>pirate chat</h1>
         </div>
       </header>
 
       <div class="content-wrap">
         <aside class="agent-sidebar">
           <div class="sidebar-header">
-            <h2>☠️ Crew Status ☠️</h2>
+            <h2>Active Agents</h2>
           </div>
 
           <div id="agent-list" class="agent-list">
             <div class="agent-card online" data-agent="Navigator">
               <span class="agent-icon">🧭</span>
-              <div class="agent-name-wrap">
+              <div class="agent-info">
                 <strong>Navigator</strong>
                 <small>Online</small>
               </div>
-              <button class="mini-toggle is-on" type="button" aria-pressed="true" aria-label="Toggle Navigator">
-                <span class="mini-toggle-knob"></span>
-              </button>
+              <span class="agent-check checked" aria-label="Select Navigator" title="Select Navigator"><span class="checkmark">✓</span></span>
             </div>
 
             <div class="agent-card online" data-agent="Treasure Hunter">
-              <span class="agent-icon">🪎</span>
-              <div class="agent-name-wrap">
+              <span class="agent-icon">🔍</span>
+              <div class="agent-info">
                 <strong>Treasure Hunter</strong>
                 <small>Online</small>
               </div>
-              <button class="mini-toggle is-on" type="button" aria-pressed="true" aria-label="Toggle Treasure Hunter">
-                <span class="mini-toggle-knob"></span>
-              </button>
+              <span class="agent-check checked" aria-label="Select Treasure Hunter" title="Select Treasure Hunter"><span class="checkmark">✓</span></span>
             </div>
 
             <div class="agent-card online" data-agent="Captain">
-              <span class="agent-icon">🏴‍☠️</span>
-              <div class="agent-name-wrap">
+              <span class="agent-icon">⚓</span>
+              <div class="agent-info">
                 <strong>Captain</strong>
                 <small>Online</small>
               </div>
-              <button class="mini-toggle is-on" type="button" aria-pressed="true" aria-label="Toggle Captain">
-                <span class="mini-toggle-knob"></span>
-              </button>
+              <span class="agent-check checked" aria-label="Select Captain" title="Select Captain"><span class="checkmark">✓</span></span>
+            </div>
+          </div>
+
+          <div class="sidebar-divider"></div>
+
+          <div class="treasure-maps-section">
+            <h3>Treasure Maps</h3>
+            <div id="treasure-maps-list" class="treasure-maps-list">
+              <div class="treasure-map-item" data-map="1">Treasure Map 1</div>
+              <div class="treasure-map-item" data-map="2">Treasure Map 2</div>
+              <div class="treasure-map-item" data-map="3">Treasure Map 3</div>
+              <div class="treasure-map-item" data-map="4">Treasure Map 4</div>
+              <div class="treasure-map-item" data-map="5">Treasure Map 5</div>
             </div>
           </div>
         </aside>
@@ -64,12 +71,21 @@
             <textarea
               id="message-input"
               rows="1"
-              placeholder="Speak to the dark crew..."
+              placeholder="the pirate crew is ready to talk"
               aria-label="Message input"
             ></textarea>
-            <button id="send-button" type="submit">☠️ Send</button>
+            <button id="send-button" type="submit">Send</button>
           </form>
         </main>
+
+        <aside class="trace-panel">
+          <div class="trace-header">
+            <h2>Agent Trace</h2>
+          </div>
+          <div id="trace-log" class="trace-log">
+            <p class="trace-empty">Awaiting agent routing...</p>
+          </div>
+        </aside>
       </div>
     </div>
 

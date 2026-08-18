@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>☠️ Pirate's Crew - Skull & Crossbones ☠️</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+            <p class="eyebrow">☠️ Summon the Cursed ☠️</p>
+          <h1>☠️ SKULL CREW ☠️</h1>
+        </div>
+      </header>
+
+      <div class="content-wrap">
+        <aside class="agent-sidebar">
+          <div class="sidebar-header">
+            <h2>☠️ Crew Status ☠️</h2>
+          </div>
+
+          <div id="agent-list" class="agent-list">
+            <div class="agent-card online" data-agent="Navigator">
+              <span class="agent-icon">🧭</span>
+              <div class="agent-name-wrap">
+                <strong>Navigator</strong>
+                <small>Online</small>
+              </div>
+              <button class="mini-toggle is-on" type="button" aria-pressed="true" aria-label="Toggle Navigator">
+                <span class="mini-toggle-knob"></span>
+              </button>
+            </div>
+
+            <div class="agent-card online" data-agent="Treasure Hunter">
+              <span class="agent-icon">🪎</span>
+              <div class="agent-name-wrap">
+                <strong>Treasure Hunter</strong>
+                <small>Online</small>
+              </div>
+              <button class="mini-toggle is-on" type="button" aria-pressed="true" aria-label="Toggle Treasure Hunter">
+                <span class="mini-toggle-knob"></span>
+              </button>
+            </div>
+
+            <div class="agent-card online" data-agent="Captain">
+              <span class="agent-icon">🏴‍☠️</span>
+              <div class="agent-name-wrap">
+                <strong>Captain</strong>
+                <small>Online</small>
+              </div>
+              <button class="mini-toggle is-on" type="button" aria-pressed="true" aria-label="Toggle Captain">
+                <span class="mini-toggle-knob"></span>
+              </button>
+            </div>
+          </div>
+        </aside>
+
+        <main class="chat-panel">
+          <div id="messages" class="messages" aria-live="polite"></div>
+
+          <form id="chat-form" class="composer">
+            <textarea
+              id="message-input"
+              rows="1"
+              placeholder="Speak to the dark crew..."
+              aria-label="Message input"
+            ></textarea>
+            <button id="send-button" type="submit">☠️ Send</button>
+          </form>
+        </main>
+      </div>
+    </div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

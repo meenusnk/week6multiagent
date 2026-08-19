@@ -44,11 +44,15 @@ async function requestChat(payload) {
 }
 
 async function readResponse(response) {
-  const contentType = response.headers?.get?.('content-type') || 'application/json';
-  if (!contentType.includes('application/json')) {
-    throw new Error('The chat service is unavailable. GitHub Pages is serving the app without its server API.');
+  if (typeof response?.json !== 'function') {
+    throw new Error('The chat service returned an invalid response.');
   }
-  return response.json();
+
+  try {
+    return await response.json();
+  } catch {
+    throw new Error('The chat service returned an invalid response.');
+  }
 }
 
 function addTrace(message, type = 'info') {

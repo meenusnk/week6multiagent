@@ -7,6 +7,41 @@ const traceLog = document.getElementById('trace-log');
 // The browser sends chat requests to the app server.
 // The server decides which specialist agent responds and then uses the classroom proxy behind the scenes.
 const API_URL = '/api/chat';
+const IS_GITHUB_PAGES = window.location.hostname.endsWith('github.io');
+
+function demoReply(message, agent = 'Captain') {
+  const topic = String(message).toLowerCase();
+  if (agent === 'Navigator' || /route|map|direction|travel|distance/.test(topic)) {
+    return 'Follow the marked route from the starting point through each waypoint. Keep the crew together and avoid uncharted waters.';
+  }
+  if (agent === 'Treasure Hunter' || /treasure|clue|hidden|search|island/.test(topic)) {
+    return 'Search each marked location carefully. Look for fresh footprints, unusual markings, and anything hidden near shelter or fresh water.';
+  }
+  return 'The crew is ready. Choose the marked route, keep the team together, and make camp before nightfall.';
+}
+
+async function requestChat(payload) {
+  if (IS_GITHUB_PAGES) {
+    const agent = payload.agent || 'Captain';
+    return {
+      ok: true,
+      async json() {
+        return {
+          agent,
+          reply: demoReply(payload.message, agent),
+          outputs: [{ agent, reply: demoReply(payload.message, agent) }],
+          trace: [`Demo mode: ${agent} responded locally.`]
+        };
+      }
+    };
+  }
+
+  return fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+}
 
 function addTrace(message, type = 'info') {
   const isEmpty = traceLog.querySelector('.trace-empty');
@@ -98,16 +133,10 @@ async function sendMessage(messageText) {
     messagesContainer.appendChild(thinkingMessage);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        message: text,
-        history: [],
-        availableAgents
-      })
+    const response = await requestChat({
+      message: text,
+      history: [],
+      availableAgents
     });
 
     const data = await response.json();
@@ -342,14 +371,10 @@ async function generateTreasureHuntStory(mapId, mapData) {
         message = `You are the Captain making the final call. Map route: ${route}. Navigator: ${navigatorBriefing} Treasure Hunter: ${hunterBriefing} Clean this plan up, choose the final route and actions, and make small practical improvements when needed. Give clear commands to the crew.`;
       }
 
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message,
-          history: [],
-          agent: agent
-        })
+      const response = await requestChat({
+        message,
+        history: [],
+        agent
       });
 
       const data = await response.json();

@@ -44,7 +44,7 @@ async function requestChat(payload) {
 }
 
 async function readResponse(response) {
-  const contentType = response.headers.get('content-type') || '';
+  const contentType = response.headers?.get?.('content-type') || 'application/json';
   if (!contentType.includes('application/json')) {
     throw new Error('The chat service is unavailable. GitHub Pages is serving the app without its server API.');
   }

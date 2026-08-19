@@ -14,10 +14,15 @@ test('parses a valid ordered planner response', () => {
 
 test('uses the LLM planner to determine the agent workflow', async () => {
   const originalFetch = global.fetch;
+  const responses = [
+    '["Navigator", "Treasure Hunter", "Captain"]',
+    'Captain'
+  ];
+  let requestCount = 0;
   global.fetch = async () => ({
     ok: true,
     json: async () => ({
-      choices: [{ message: { content: '["Navigator", "Treasure Hunter", "Captain"]' } }]
+      choices: [{ message: { content: responses[requestCount++] } }]
     })
   });
 
@@ -33,10 +38,12 @@ test('uses the LLM planner to determine the agent workflow', async () => {
 
 test('planner excludes offline agents and preserves an online fallback', async () => {
   const originalFetch = global.fetch;
+  const responses = ['["Navigator"]', 'Navigator'];
+  let requestCount = 0;
   global.fetch = async () => ({
     ok: true,
     json: async () => ({
-      choices: [{ message: { content: '["Captain"]' } }]
+      choices: [{ message: { content: responses[requestCount++] } }]
     })
   });
 
@@ -49,6 +56,27 @@ test('planner excludes offline agents and preserves an online fallback', async (
   } finally {
     global.fetch = originalFetch;
   }
+});
+
+test('does not dispatch an explicitly requested offline agent', async () => {
+  await assert.rejects(
+    runOrchestratedAgent({
+      message: 'Where is the treasure?',
+      agent: 'Captain',
+      availableAgents: ['Navigator', 'Treasure Hunter']
+    }),
+    /requested agent is offline/
+  );
+});
+
+test('does not restore offline agents when every agent is disabled', async () => {
+  await assert.rejects(
+    determineAgents({
+      message: 'Where is the treasure?',
+      availableAgents: []
+    }),
+    /No agents are online/
+  );
 });
 
 test('uses the classroom proxy even if older OpenAI keys exist in the environment', () => {
@@ -141,6 +169,7 @@ test('plans dynamically, then runs the planned agents in order', async () => {
   const originalFetch = global.fetch;
   const responses = [
     '["Navigator", "Captain"]',
+    'Captain',
     'Route briefing',
     'Final command'
   ];
@@ -161,7 +190,7 @@ test('plans dynamically, then runs the planned agents in order', async () => {
 
     assert.deepEqual(result.agents, ['Navigator', 'Captain']);
     assert.deepEqual(result.outputs.map(output => output.reply), ['Route briefing', 'Final command']);
-    assert.equal(requestCount, 3);
+    assert.equal(requestCount, 4);
   } finally {
     global.fetch = originalFetch;
   }

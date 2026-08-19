@@ -32,7 +32,18 @@ function demoReply(message, agent = 'Captain') {
 
 async function requestChat(payload) {
   if (IS_GITHUB_PAGES) {
-    const agent = payload.agent || 'Captain';
+    const onlineAgents = payload.availableAgents || [];
+    const agent = onlineAgents.includes(payload.agent)
+      ? payload.agent
+      : onlineAgents[0];
+    if (!agent) {
+      return {
+        ok: false,
+        async json() {
+          return { error: 'No agents are online. Turn on at least one agent to continue.' };
+        }
+      };
+    }
     return {
       ok: true,
       async json() {
@@ -245,18 +256,18 @@ checkboxes.forEach(checkbox => {
     const agentCard = checkbox.closest('.agent-card');
     const statusElement = agentCard.querySelector('small');
     
-    agentCard.classList.toggle('online');
-    agentCard.classList.toggle('offline');
+    const isOnline = checkbox.classList.contains('checked');
+    agentCard.classList.toggle('online', isOnline);
+    agentCard.classList.toggle('offline', !isOnline);
     
     // Update status text
-    const isOnline = agentCard.classList.contains('online');
     statusElement.textContent = isOnline ? 'Online' : 'Offline';
   });
 });
 
 function getOnlineAgents() {
-  return Array.from(document.querySelectorAll('.agent-card.online'))
-    .map(card => card.dataset.agent)
+  return Array.from(document.querySelectorAll('.agent-check.checked'))
+    .map(checkbox => checkbox.closest('.agent-card')?.dataset.agent)
     .filter(Boolean);
 }
 

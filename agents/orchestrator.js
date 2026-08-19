@@ -30,9 +30,27 @@ function parseAgentPlan(reply) {
   return validAgents;
 }
 
+function parseSingleAgent(reply, onlineAgents) {
+  const cleaned = String(reply || '')
+    .trim()
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/\s*```$/i, '');
+  const selectedAgent = cleaned.replace(/^"|"$/g, '');
+
+  if (!onlineAgents.includes(selectedAgent)) {
+    throw new Error('The answer selector returned an offline agent.');
+  }
+
+  return selectedAgent;
+}
+
 async function determineAgents({ message, history = [], availableAgents = AVAILABLE_AGENTS }) {
   const onlineAgents = AVAILABLE_AGENTS.filter(agent => availableAgents.includes(agent));
-  const plannerAgents = onlineAgents.length > 0 ? onlineAgents : AVAILABLE_AGENTS;
+  if (onlineAgents.length === 0) {
+    throw new Error('No agents are online. Turn on at least one agent to continue.');
+  }
+
+  const plannerAgents = onlineAgents;
   const systemPrompt = `You are the orchestration planner for a multi-agent pirate assistant. Determine which specialist agents should answer the user's request and the exact order they should run.
 
 Available agents:
@@ -56,7 +74,30 @@ Choose the smallest useful ordered list from the online agents. If the user dire
     const agents = parseAgentPlan(plannerReply);
     const unavailable = agents.some(agent => !plannerAgents.includes(agent));
     if (unavailable) throw new Error('The planner selected an offline agent.');
-    return { agents, trace: ['LLM planner selected the agent workflow.'] };
+
+    const answerAgentReply = await callModel({
+      message,
+      history,
+      systemPrompt: `You are the final routing selector for a multi-agent pirate assistant. Choose exactly one agent to answer the user's prompt. Base the choice on the prompt and only choose from the agents currently online.
+
+Online agents: ${onlineAgents.join(', ')}
+The first planner suggested this workflow: ${agents.join(', ')}
+
+Return ONLY the exact name of one online agent. Never choose an offline agent and never return an explanation.`,
+      temperature: 0,
+      model: 'class-chat-model',
+      maxTokens: 30,
+      timeoutMs: 10000
+    });
+    const answerAgent = parseSingleAgent(answerAgentReply, onlineAgents);
+    const selectedAgents = agents.includes(answerAgent)
+      ? agents
+      : [answerAgent, ...agents];
+
+    return {
+      agents: selectedAgents,
+      trace: ['LLM planner selected the agent workflow.', `LLM answer selector chose ${answerAgent}.`]
+    };
   } catch (error) {
     const fallback = plannerAgents.includes('Captain')
       ? ['Captain']
@@ -69,8 +110,14 @@ Choose the smallest useful ordered list from the online agents. If the user dire
 async function runOrchestratedAgent({ message, history = [], agent, availableAgents = AVAILABLE_AGENTS }) {
   const requestedAgents = Array.isArray(agent) ? agent : agent ? [agent] : null;
   const onlineAgents = AVAILABLE_AGENTS.filter(candidate => availableAgents.includes(candidate));
+  if (onlineAgents.length === 0) {
+    throw new Error('No agents are online. Turn on at least one agent to continue.');
+  }
+
   const agentChoice = requestedAgents
-    ? { agents: requestedAgents, trace: [] }
+    ? requestedAgents.every(candidate => onlineAgents.includes(candidate))
+      ? { agents: requestedAgents, trace: [] }
+      : (() => { throw new Error('The requested agent is offline.'); })()
     : await determineAgents({ message, history, availableAgents: onlineAgents });
   const selectedAgents = agentChoice.agents;
   const trace = agentChoice.trace;

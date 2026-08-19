@@ -414,6 +414,249 @@ h1 {
   padding: 8px 12px;
 }
 
+.map-message {
+  width: min(760px, 92%);
+  max-width: 92%;
+  padding: 16px;
+  background: #ead7a5;
+  border: 2px solid #76542f;
+  border-radius: 4px 14px 4px 14px;
+  color: #3c2a18;
+  box-shadow: 4px 5px 0 rgba(60, 42, 24, 0.18);
+}
+
+.map-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.map-heading strong,
+.map-heading small { display: block; }
+
+.map-heading strong { font-size: 1.15rem; }
+
+.map-heading small {
+  margin-top: 2px;
+  color: #76542f;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.map-compass {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 2px solid #76542f;
+  border-radius: 50%;
+  color: #9c3d24;
+  font-size: 1.25rem;
+}
+
+.treasure-map {
+  position: relative;
+  min-height: 340px;
+  overflow: hidden;
+  border: 1px solid rgba(70, 46, 25, 0.48);
+  background: linear-gradient(120deg, rgba(255, 246, 208, 0.28), transparent 42%), #c9b477;
+  box-shadow: inset 0 0 28px rgba(73, 42, 15, 0.28);
+}
+
+.map-scenery,
+.map-scenery::before,
+.map-scenery::after {
+  position: absolute;
+  pointer-events: none;
+}
+
+.map-scenery { z-index: 0; opacity: 0.82; }
+.scenery-position-1 { top: 7%; left: 7%; }
+.scenery-position-2 { top: 12%; right: 8%; }
+.scenery-position-3 { bottom: 8%; left: 9%; }
+.scenery-position-4 { right: 18%; bottom: 12%; }
+.scenery-position-5 { top: 47%; left: 3%; }
+
+.scenery-cloud {
+  width: 104px;
+  height: 48px;
+  bottom: auto;
+  background: #fffdf2;
+  border-radius: 50px 50px 28px 28px;
+  box-shadow: 0 2px 0 rgba(118, 84, 47, 0.18);
+}
+
+.scenery-cloud::before,
+.scenery-cloud::after {
+  content: '';
+  position: absolute;
+  bottom: 10px;
+  background: #fffdf2;
+  border-radius: 50%;
+}
+
+.scenery-cloud::before {
+  left: 12px;
+  width: 48px;
+  height: 48px;
+}
+
+.scenery-cloud::after {
+  right: 12px;
+  width: 56px;
+  height: 56px;
+}
+
+.scenery-mountain { width: 125px; height: 70px; background: linear-gradient(145deg, transparent 0 30%, #8a714b 31% 47%, #ead9a5 48% 53%, #665037 54% 72%, transparent 73%), linear-gradient(35deg, transparent 0 40%, #a28453 41% 58%, #f0dfad 59% 64%, #71583b 65% 83%, transparent 84%); clip-path: polygon(0 100%, 0 72%, 20% 48%, 34% 65%, 54% 22%, 67% 52%, 80% 37%, 100% 72%, 100% 100%); }
+
+.scenery-palm { width: 62px; height: 82px; }
+.scenery-palm::before { content: ''; left: 27px; bottom: 0; width: 10px; height: 58px; background: #9b713e; border-radius: 80% 35% 20% 20%; transform: rotate(8deg); }
+.scenery-palm::after { content: '⌁'; top: -9px; left: 3px; color: #4e773f; font-size: 4rem; font-weight: bold; transform: rotate(-28deg); }
+
+.scenery-island {
+  z-index: 1;
+  overflow: visible;
+  width: 150px;
+  height: 52px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 36%, #f8df91 0 54%, #e5b95f 72%, #f4d47e 73%);
+  box-shadow: 0 15px 0 -3px #58b5c5, 0 20px 0 -6px #3f91a2;
+}
+
+.scenery-island::before {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 92px;
+  left: 67px;
+  top: -84px;
+  background: linear-gradient(90deg, #81552c, #b6793d 45%, #734a29 72%);
+  border-radius: 75% 35% 18% 18%;
+  transform: rotate(7deg) skewX(-5deg);
+  transform-origin: bottom center;
+  clip-path: polygon(32% 0, 88% 0, 75% 100%, 0 100%);
+}
+
+.scenery-island::after {
+  content: '';
+  position: absolute;
+  width: 132px;
+  height: 86px;
+  left: 9px;
+  top: -104px;
+  background: #6da334;
+  border-radius: 50%;
+  box-shadow: -35px 15px 0 -9px #568c2d, 35px 12px 0 -8px #7fac3b, -12px -18px 0 -11px #4f842b, 21px -23px 0 -12px #80ad3c;
+  clip-path: polygon(51% 85%, 0 58%, 25% 61%, 7% 26%, 39% 49%, 32% 0, 53% 45%, 79% 5%, 67% 49%, 100% 28%, 77% 64%);
+}
+
+.scenery-wave { width: 118px; height: 28px; border-top: 3px solid #4f8588; border-radius: 50%; transform: rotate(-8deg); opacity: 0.8; }
+.scenery-wave::before, .scenery-wave::after { content: ''; position: absolute; width: 76px; border-top: 2px solid #6fa4a0; border-radius: 50%; }
+.scenery-wave::before { top: 10px; left: 20px; }
+.scenery-wave::after { top: 20px; left: 5px; }
+
+.map-valley .scenery-mountain,
+.map-citadel .scenery-mountain { filter: saturate(1.15); }
+.map-route {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.map-route path {
+  fill: none;
+  stroke: #9c3d24;
+  stroke-width: 1.7;
+  stroke-dasharray: 3.5 2.5;
+  stroke-linecap: round;
+}
+
+.map-landmark {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 132px;
+  height: 42px;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: #3c2a18;
+}
+
+.landmark-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 0;
+  background-color: rgba(248, 237, 198, 0.52);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 72% 72%;
+  box-shadow: 0 2px 0 rgba(60, 42, 24, 0.22);
+}
+
+.landmark-temple { background-image: linear-gradient(#a47a43 0 18%, transparent 19%), linear-gradient(135deg, transparent 42%, #5a8b8a 43% 58%, transparent 59%), linear-gradient(45deg, transparent 42%, #5a8b8a 43% 58%, transparent 59%); }
+.landmark-cave { border-radius: 50% 50% 8px 8px; background-image: radial-gradient(ellipse at center, #3d3a34 0 46%, #8a6338 48% 67%, transparent 69%); }
+.landmark-ship { background-image: linear-gradient(160deg, transparent 42%, #8a4e32 43% 67%, transparent 68%), linear-gradient(90deg, transparent 48%, #6e5033 49% 53%, transparent 54%); }
+.landmark-cliff { background-image: linear-gradient(145deg, transparent 0 42%, #9f663d 43% 72%, #6c7d55 73%); }
+.landmark-crypt { background-image: linear-gradient(#7d6b57 0 18%, transparent 19%), linear-gradient(90deg, transparent 20%, #554942 21% 79%, transparent 80%); }
+.landmark-forest { background-image: linear-gradient(90deg, transparent 28%, #765b36 29% 39%, transparent 40%), linear-gradient(45deg, transparent 34%, #56804c 35% 66%, transparent 67%); }
+.landmark-rock { background-image: radial-gradient(ellipse at 50% 68%, #6b7770 0 44%, #9aab91 46% 64%, transparent 66%); }
+.landmark-wreck { background-image: linear-gradient(155deg, transparent 42%, #815136 43% 64%, transparent 65%), linear-gradient(90deg, transparent 48%, #715137 49% 53%, transparent 54%); }
+.landmark-reef { background-image: radial-gradient(circle at 32% 62%, #d47962 0 15%, transparent 16%), radial-gradient(circle at 66% 58%, #d0a34e 0 15%, transparent 16%), linear-gradient(#4e9a96 0 52%, transparent 53%); }
+.landmark-throne { background-image: linear-gradient(#a6753f 0 18%, transparent 19%), linear-gradient(90deg, #a6753f 0 22%, transparent 23% 77%, #a6753f 78%); }
+.landmark-lava { background-image: linear-gradient(145deg, transparent 0 35%, #8c5a38 36% 68%, #d85331 69% 75%, transparent 76%); }
+.landmark-mirror { background-image: linear-gradient(135deg, #92b6b0 0 48%, #e3d79b 49% 53%, #92b6b0 54%); }
+.landmark-beach { background-image: linear-gradient(#6a9fa0 0 42%, #e0c77d 43% 72%, #5d884c 73%); }
+.landmark-peak { background-image: linear-gradient(145deg, transparent 0 38%, #6e604a 39% 68%, #eadcb0 69% 74%, transparent 75%); }
+.landmark-lagoon { background-image: radial-gradient(ellipse, #4e9d9b 0 46%, #739b55 48% 65%, transparent 67%); }
+.landmark-island { background-image: linear-gradient(#5f9b9b 0 44%, #d7bd70 45% 71%, #67934f 72%); }
+.landmark-citadel { background-image: linear-gradient(#9b7040 0 22%, transparent 23%), linear-gradient(90deg, #755338 0 22%, transparent 23% 77%, #755338 78%); }
+
+.map-destination {
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: #c32f28;
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1;
+  z-index: 3;
+  transform: translate(-50%, -50%);
+  text-shadow: 0 1px 0 #f8df91;
+}
+
+.destination-landmark {
+  width: 1px;
+  height: 1px;
+}
+
+.map-landmark.destination-landmark strong {
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.map-landmark strong { position: absolute; top: 48px; max-width: 132px; font-family: Georgia, 'Times New Roman', serif; font-size: 0.86rem; line-height: 1.15; }
+
+.map-footer {
+  margin-top: 12px;
+  color: #76542f;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 0.82rem;
+  text-align: center;
+}
+
 .composer {
   display: flex;
   gap: 12px;

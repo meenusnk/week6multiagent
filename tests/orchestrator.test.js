@@ -1,23 +1,54 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const { chooseAgent, runOrchestratedAgent } = require('../agents/orchestrator');
+const { determineAgents, parseAgentPlan, runOrchestratedAgent } = require('../agents/orchestrator');
 const { getActiveModelConfig } = require('../agents/llm');
 
-test('routes map requests to Navigator', () => {
-  assert.equal(chooseAgent('Find the quickest route from Paris to Berlin'), 'Navigator');
+test('parses a valid ordered planner response', () => {
+  assert.deepEqual(parseAgentPlan('["Navigator", "Treasure Hunter", "Captain"]'), [
+    'Navigator',
+    'Treasure Hunter',
+    'Captain'
+  ]);
 });
 
-test('routes treasure clues to Treasure Hunter', () => {
-  assert.equal(chooseAgent('Search the island for hidden treasure clues'), 'Treasure Hunter');
+test('uses the LLM planner to determine the agent workflow', async () => {
+  const originalFetch = global.fetch;
+  global.fetch = async () => ({
+    ok: true,
+    json: async () => ({
+      choices: [{ message: { content: '["Navigator", "Treasure Hunter", "Captain"]' } }]
+    })
+  });
+
+  try {
+    const result = await determineAgents({
+      message: 'Plan a route, investigate clues, and decide the final crew action.'
+    });
+    assert.deepEqual(result.agents, ['Navigator', 'Treasure Hunter', 'Captain']);
+  } finally {
+    global.fetch = originalFetch;
+  }
 });
 
-test('routes final decisions to Captain', () => {
-  assert.equal(chooseAgent('Captain, choose where the crew should go next'), 'Captain');
-});
+test('planner excludes offline agents and preserves an online fallback', async () => {
+  const originalFetch = global.fetch;
+  global.fetch = async () => ({
+    ok: true,
+    json: async () => ({
+      choices: [{ message: { content: '["Captain"]' } }]
+    })
+  });
 
-test('defaults to Captain when the intent is unclear', () => {
-  assert.equal(chooseAgent('Hello there'), 'Captain');
+  try {
+    const result = await determineAgents({
+      message: 'Navigator, which way is north?',
+      availableAgents: ['Navigator', 'Treasure Hunter']
+    });
+    assert.deepEqual(result.agents, ['Navigator']);
+  } finally {
+    global.fetch = originalFetch;
+  }
 });
 
 test('uses the classroom proxy even if older OpenAI keys exist in the environment', () => {
@@ -52,15 +83,16 @@ test('dispatches to the selected agent when the orchestrator already knows the r
   });
 
   try {
-    const reply = await runOrchestratedAgent({
+    const result = await runOrchestratedAgent({
       message: 'Plan the safest route to the cove.',
       history: [],
       agent: 'Navigator'
     });
 
-    assert.equal(typeof reply, 'string');
-    assert.ok(reply.length > 0);
-    assert.match(reply, /north|cove|route/i);
+    assert.deepEqual(result.agents, ['Navigator']);
+    assert.equal(result.outputs.length, 1);
+    assert.equal(typeof result.outputs[0].reply, 'string');
+    assert.match(result.outputs[0].reply, /north|cove|route/i);
   } finally {
     global.fetch = originalFetch;
     if (originalKey === undefined) {
@@ -74,5 +106,63 @@ test('dispatches to the selected agent when the orchestrator already knows the r
     } else {
       process.env.OPENAI_BASE_URL = originalBaseUrl;
     }
+  }
+});
+
+test('runs multiple selected agents sequentially and returns every output', async () => {
+  const originalFetch = global.fetch;
+  const responses = ['Route briefing', 'Clue briefing', 'Final command'];
+  let requestCount = 0;
+
+  global.fetch = async () => ({
+    ok: true,
+    json: async () => ({
+      choices: [{ message: { content: responses[requestCount++] } }]
+    })
+  });
+
+  try {
+    const result = await runOrchestratedAgent({
+      message: 'Plan the route and find clues before making the final decision.',
+      history: [],
+      agent: ['Navigator', 'Treasure Hunter', 'Captain']
+    });
+
+    assert.deepEqual(result.agents, ['Navigator', 'Treasure Hunter', 'Captain']);
+    assert.deepEqual(result.outputs.map(output => output.agent), result.agents);
+    assert.deepEqual(result.outputs.map(output => output.reply), responses);
+    assert.equal(requestCount, 3);
+  } finally {
+    global.fetch = originalFetch;
+  }
+});
+
+test('plans dynamically, then runs the planned agents in order', async () => {
+  const originalFetch = global.fetch;
+  const responses = [
+    '["Navigator", "Captain"]',
+    'Route briefing',
+    'Final command'
+  ];
+  let requestCount = 0;
+
+  global.fetch = async () => ({
+    ok: true,
+    json: async () => ({
+      choices: [{ message: { content: responses[requestCount++] } }]
+    })
+  });
+
+  try {
+    const result = await runOrchestratedAgent({
+      message: 'Plan the safest route and make the final decision.',
+      history: []
+    });
+
+    assert.deepEqual(result.agents, ['Navigator', 'Captain']);
+    assert.deepEqual(result.outputs.map(output => output.reply), ['Route briefing', 'Final command']);
+    assert.equal(requestCount, 3);
+  } finally {
+    global.fetch = originalFetch;
   }
 });

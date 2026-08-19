@@ -35,22 +35,25 @@ app.get('/api/health', (req, res) => {
 });
 
 app.post('/api/chat', async (req, res) => {
-  const { message, history = [], agent } = req.body || {};
+  const { message, history = [], agent, availableAgents } = req.body || {};
 
   if (!message || !String(message).trim()) {
     return res.status(400).json({ error: 'A message is required.' });
   }
 
   try {
-    const { reply, agent: selectedAgent, trace } = await runOrchestratedAgent({
+    const { reply, agent: selectedAgent, agents, outputs, trace } = await runOrchestratedAgent({
       message,
       history,
-      agent
+      agent,
+      availableAgents
     });
 
     res.json({
       agent: selectedAgent,
+      agents,
       reply,
+      outputs,
       trace
     });
   } catch (error) {

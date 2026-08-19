@@ -7,7 +7,8 @@ async function runNavigator({ message, history = [] }) {
     message,
     history,
     systemPrompt,
-    temperature: 0.5
+    temperature: 0.5,
+    maxTokens: 700
   });
 }
 

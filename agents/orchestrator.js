@@ -49,7 +49,9 @@ Choose the smallest useful ordered list from the online agents. If the user dire
       history,
       systemPrompt,
       temperature: 0,
-      model: 'class-chat-model'
+      model: 'class-chat-model',
+      maxTokens: 80,
+      timeoutMs: 10000
     });
     const agents = parseAgentPlan(plannerReply);
     const unavailable = agents.some(agent => !plannerAgents.includes(agent));

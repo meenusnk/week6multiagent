@@ -25,6 +25,8 @@ async function callModel({
   systemPrompt,
   model,
   temperature = 0.7,
+  maxTokens = 300,
+  timeoutMs = 15000,
   env = process.env
 }) {
   if (!message || !String(message).trim()) {
@@ -52,7 +54,7 @@ async function callModel({
   // We send JSON with the model name and message list.
   // Request streaming for faster perceived response time
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
   let response;
   try {
@@ -67,7 +69,7 @@ async function callModel({
         messages,
         temperature,
         stream: false,
-        max_tokens: 500
+        max_tokens: maxTokens
       }),
       signal: controller.signal
     });

@@ -9,15 +9,25 @@ const traceLog = document.getElementById('trace-log');
 const API_URL = '/api/chat';
 const IS_GITHUB_PAGES = window.location.hostname.endsWith('github.io');
 
+function extractDemoRoute(message) {
+  const routeMatch = String(message).match(/Starting point\s*[- >]+(.+?)(?:\.|$)/i);
+  if (!routeMatch) return ['Starting Point'];
+  return ['Starting Point', ...routeMatch[1].split(/\s*(?:->|→)\s*/).filter(Boolean)];
+}
+
 function demoReply(message, agent = 'Captain') {
-  const topic = String(message).toLowerCase();
-  if (agent === 'Navigator' || /route|map|direction|travel|distance/.test(topic)) {
-    return 'Follow the marked route from the starting point through each waypoint. Keep the crew together and avoid uncharted waters.';
+  const route = extractDemoRoute(message);
+  const destination = route.at(-1);
+
+  if (agent === 'Navigator') {
+    return `Navigator's route:\n\n${route.map((place, index) => `${index + 1}. ${place}${index === route.length - 1 ? ' - final destination' : ''}`).join('\n')}\n\nKeep the ship on the marked trail, slow down at each hazard, and approach ${destination} through its safest entrance.`;
   }
-  if (agent === 'Treasure Hunter' || /treasure|clue|hidden|search|island/.test(topic)) {
-    return 'Search each marked location carefully. Look for fresh footprints, unusual markings, and anything hidden near shelter or fresh water.';
+
+  if (agent === 'Treasure Hunter') {
+    return `Treasure clues along the route:\n\n${route.slice(1).map((place, index) => `${index + 1}. ${place}: Search for a marking, relic, or hidden passage. Move slowly through the danger and leave a clear signal for the crew behind you.`).join('\n\n')}\n\nThe clues lead toward ${destination}.`;
   }
-  return 'The crew is ready. Choose the marked route, keep the team together, and make camp before nightfall.';
+
+  return `Captain's final orders:\n\nFollow the marked route through ${route.slice(1).join(', ')} and finish at ${destination}. The Navigator's course stands, the Treasure Hunter checks each clue, and every crew member uses their own safety gear. Slow down at hazards, regroup after each landmark, and enter the final destination together.`;
 }
 
 async function requestChat(payload) {

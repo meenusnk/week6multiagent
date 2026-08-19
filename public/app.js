@@ -191,11 +191,15 @@ async function sendMessage(messageText) {
       throw new Error(data?.error || 'Request failed.');
     }
 
-    const outputs = Array.isArray(data?.outputs) && data.outputs.length
+    const responseOutputs = Array.isArray(data?.outputs) && data.outputs.length
       ? data.outputs
       : [{ agent: data?.agent || 'Captain', reply: data?.reply || '' }];
+    const outputs = responseOutputs.filter(output => availableAgents.includes(output.agent));
+    if (!outputs.length) {
+      throw new Error('The selected agent is offline. Turn on that agent and try again.');
+    }
     const reply = data?.reply?.trim() || outputs.at(-1)?.reply?.trim();
-    const agent = data?.agent || outputs.at(-1)?.agent || 'Captain';
+    const agent = outputs.at(-1)?.agent;
     const trace = data?.trace || [];
 
     if (!reply) {
@@ -431,9 +435,9 @@ async function generateTreasureHuntStory(mapId, mapData) {
       });
 
       const data = await readResponse(response);
-      if (response.ok && data.reply) {
+      if (response.ok && data.reply && getOnlineAgents().includes(data.agent || agent)) {
         stories.push({
-          agent: agent,
+          agent: data.agent || agent,
           reply: data.reply.trim()
         });
       }

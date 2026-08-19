@@ -30,12 +30,25 @@ function demoReply(message, agent = 'Captain') {
   return `Captain's final orders:\n\nFollow the marked route through ${route.slice(1).join(', ')} and finish at ${destination}. The Navigator's course stands, the Treasure Hunter checks each clue, and every crew member uses their own safety gear. Slow down at hazards, regroup after each landmark, and enter the final destination together.`;
 }
 
+function chooseDemoAgent(message, onlineAgents) {
+  const prompt = String(message).toLowerCase();
+  const preferredAgents = prompt.match(/treasure|clue|hidden|artifact|investigate|search/)
+    ? ['Treasure Hunter', 'Navigator', 'Captain']
+    : prompt.match(/route|map|direction|travel|where do we go/)
+      ? ['Navigator', 'Treasure Hunter', 'Captain']
+      : prompt.match(/captain|decide|choose|final|recommend/)
+        ? ['Captain', 'Treasure Hunter', 'Navigator']
+        : onlineAgents;
+
+  return preferredAgents.find(agent => onlineAgents.includes(agent));
+}
+
 async function requestChat(payload) {
   if (IS_GITHUB_PAGES) {
     const onlineAgents = payload.availableAgents || [];
     const agent = onlineAgents.includes(payload.agent)
       ? payload.agent
-      : onlineAgents[0];
+      : chooseDemoAgent(payload.message, onlineAgents);
     if (!agent) {
       return {
         ok: false,
@@ -278,7 +291,13 @@ input.addEventListener('keydown', (event) => {
   }
 });
 
-addMessage('assistant', '🏴‍☠️ Captain\nAhoy, matey! Ready to set sail with the crew.');
+const initialAgent = getOnlineAgents()[0];
+addMessage(
+  'assistant',
+  initialAgent
+    ? `${initialAgent}\nAhoy, matey! Ready to set sail with the crew.`
+    : 'Crew\nAll agents are offline. Turn one on when you are ready to set sail.'
+);
 
 // Treasure maps data
 const treasureMaps = {
@@ -407,7 +426,8 @@ async function generateTreasureHuntStory(mapId, mapData) {
       const response = await requestChat({
         message,
         history: [],
-        agent
+        agent,
+        availableAgents: getOnlineAgents()
       });
 
       const data = await readResponse(response);

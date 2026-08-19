@@ -43,6 +43,14 @@ async function requestChat(payload) {
   });
 }
 
+async function readResponse(response) {
+  const contentType = response.headers.get('content-type') || '';
+  if (!contentType.includes('application/json')) {
+    throw new Error('The chat service is unavailable. GitHub Pages is serving the app without its server API.');
+  }
+  return response.json();
+}
+
 function addTrace(message, type = 'info') {
   const isEmpty = traceLog.querySelector('.trace-empty');
   if (isEmpty) isEmpty.remove();
@@ -139,7 +147,7 @@ async function sendMessage(messageText) {
       availableAgents
     });
 
-    const data = await response.json();
+    const data = await readResponse(response);
 
     if (!response.ok) {
       throw new Error(data?.error || 'Request failed.');
@@ -377,7 +385,7 @@ async function generateTreasureHuntStory(mapId, mapData) {
         agent
       });
 
-      const data = await response.json();
+      const data = await readResponse(response);
       if (response.ok && data.reply) {
         stories.push({
           agent: agent,
